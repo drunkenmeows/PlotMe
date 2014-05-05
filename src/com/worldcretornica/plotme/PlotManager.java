@@ -13,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Jukebox;
 import org.bukkit.block.Sign;
@@ -79,7 +80,7 @@ public class PlotManager
 				}
 			}
 			
-			if(road)
+			if(road && pmi.UsePath)
 			{
 				/*if(pmi.AutoLinkPlots)
 				{
@@ -366,6 +367,8 @@ public class PlotManager
 		{
 			return false;
 		}
+
+
 	}
 	
 	@Deprecated
@@ -386,16 +389,128 @@ public class PlotManager
 			return null;
 		}
 	}
+  
+  //drunkenmeows
+  	public static void setblock(Block top, int blockid)
+	{
+		if(top.getType() == Material.GRASS || top.getType() == Material.STONE || top.getType() == Material.SAND 
+		|| top.getType() == Material.CLAY || top.getType() == Material.GRAVEL || top.getType() == Material.DIRT)
+		{
+			top.setType(Material.getMaterial(blockid));
+		}
+	}
+	
+	//create outline in the sky
+	public static void addborder(World w, int height, int blockid, String id)
+	{
+		int bx = bottomX(id, w);
+		int tx = topX(id, w);
+		int bz = bottomZ(id,w);
+		int tz = topZ(id,w);
+		
+		int y = height;
+		
+		for(int i = bx; i != tx; i++)
+		{
+			if(y > 0) {
+				//sky border
+				w.getBlockAt(i, y, tz).setTypeId(blockid);
+				w.getBlockAt(i, y, bz).setTypeId(blockid);
+			} else {
+				//terrain border
+				Block top = w.getHighestBlockAt(i,tz).getRelative(BlockFace.DOWN);
+				setblock(top, blockid);
+				top = w.getHighestBlockAt(i,bz).getRelative(BlockFace.DOWN);
+				setblock(top, blockid);
+			}
+		}
+		
+		for(int i = bz; i != tz+1; i++)
+		{
+			if(y > 0) {
+				w.getBlockAt(bx, y, i).setTypeId(blockid);
+				w.getBlockAt(tx, y, i).setTypeId(blockid);
+			} else {
+				Block top = w.getHighestBlockAt(bx,i).getRelative(BlockFace.DOWN);
+				setblock(top, blockid);
+				top = w.getHighestBlockAt(tx,i).getRelative(BlockFace.DOWN);
+				setblock(top, blockid);
+			}
+		}
+		
+	}
+	
+	public static void removeborder(World w, int height, String id)
+	{
+		int bx = bottomX(id, w);
+		int tx = topX(id, w);
+		int bz = bottomZ(id,w);
+		int tz = topZ(id,w);
+		
+		int y = height;
+		
+		if(y > 0 )
+		{
+			for(int i = bx; i != tx; i++)
+			{
+				w.getBlockAt(i, y, tz).setType(Material.AIR);
+				w.getBlockAt(i, y, bz).setType(Material.AIR);
+			}
+			
+			for(int i = bz; i != tz+1; i++)
+			{
+				w.getBlockAt(bx, y, i).setType(Material.AIR);
+				w.getBlockAt(tx, y, i).setType(Material.AIR);
+			}
+		} else { 
+			for(int i = bx; i != tx; i++)
+			{
+				Block top = w.getHighestBlockAt(i,tz).getRelative(BlockFace.DOWN);
+				if(top.getType() == Material.GLOWSTONE) {
+					top.setType(top.getRelative(BlockFace.NORTH).getType());
+				}
+				
+				top = w.getHighestBlockAt(i,bz).getRelative(BlockFace.DOWN);
+				
+				if(top.getType() == Material.GLOWSTONE) {
+					top.setType(top.getRelative(BlockFace.SOUTH).getType());
+				}
+				
+			}
+			
+			for(int i = bz; i != tz+1; i++)
+			{
+				Block top = w.getHighestBlockAt(bx,i).getRelative(BlockFace.DOWN);
+				if(top.getType() == Material.GLOWSTONE) {
+					top.setType(top.getRelative(BlockFace.EAST).getType());
+				}
+				
+				top = w.getHighestBlockAt(tx,i).getRelative(BlockFace.DOWN);
+				
+				if(top.getType() == Material.GLOWSTONE) {
+					top.setType(top.getRelative(BlockFace.WEST).getType());
+				}
+			}
+		}
+		
+	} 
+  //drunkenmeows
 	
 	public static Plot createPlot(World world, String id, String owner, UUID uuid)
     {
         if(isPlotAvailable(id, world) && id != "")
         {
             Plot plot = new Plot(owner, uuid, getPlotTopLoc(world, id), getPlotBottomLoc(world, id), id, getMap(world).DaysToExpiration);
+            PlotMapInfo pmi = getMap(world); //drunkenmeows
             
             setOwnerSign(world, plot);
             
             getPlots(world).put(id, plot);
+            
+            //drunkenmeows
+            if(pmi.Terrain)
+              addborder(world, pmi.Height, pmi.WallBlockId, id);
+            
             SqlManager.addPlot(plot, getIdX(id), getIdZ(id), world);
             return plot;
         }
@@ -543,12 +658,20 @@ public class PlotManager
 	{
 		int px = getIdX(id);
 		int pz = getIdZ(id);
+		//drunkenmeows
+    int x;
+		int z;
 		
 		PlotMapInfo pmi = getMap(world);
-		
-		int x = px * (pmi.PlotSize + pmi.PathWidth) - (pmi.PlotSize) - ((int)Math.floor(pmi.PathWidth/2));
-		int z = pz * (pmi.PlotSize + pmi.PathWidth) - (pmi.PlotSize) - ((int)Math.floor(pmi.PathWidth/2));
-		
+		if(pmi.UsePath) {
+			x = px * (pmi.PlotSize + pmi.PathWidth) - (pmi.PlotSize) - ((int)Math.floor(pmi.PathWidth/2));
+			z = pz * (pmi.PlotSize + pmi.PathWidth) - (pmi.PlotSize) - ((int)Math.floor(pmi.PathWidth/2));
+		} else {
+			//shift the pot if no path
+			x = px * (pmi.PlotSize + pmi.PathWidth) - (pmi.PlotSize) - ((int)Math.floor(pmi.PathWidth/2)) + 1;
+			z = pz * (pmi.PlotSize + pmi.PathWidth) - (pmi.PlotSize) - ((int)Math.floor(pmi.PathWidth/2)) + 1;	
+		}
+		//drunkenmeows
 		return new Location(world, x, 1, z);
 	}
 	
@@ -556,12 +679,20 @@ public class PlotManager
 	{
 		int px = getIdX(id);
 		int pz = getIdZ(id);
+		//drunkenmeows
+		int x;
+		int z;
 		
 		PlotMapInfo pmi = getMap(world);
-		
-		int x = px * (pmi.PlotSize + pmi.PathWidth) - ((int)Math.floor(pmi.PathWidth/2)) - 1;
-		int z = pz * (pmi.PlotSize + pmi.PathWidth) - ((int)Math.floor(pmi.PathWidth/2)) - 1;
-		
+		if(pmi.UsePath) {
+			x = px * (pmi.PlotSize + pmi.PathWidth) - ((int)Math.floor(pmi.PathWidth/2)) - 1;
+			z = pz * (pmi.PlotSize + pmi.PathWidth) - ((int)Math.floor(pmi.PathWidth/2)) - 1;
+		} else {
+		//shift the plot if no path
+			x = px * (pmi.PlotSize + pmi.PathWidth) - ((int)Math.floor(pmi.PathWidth/2));
+			z = pz * (pmi.PlotSize + pmi.PathWidth) - ((int)Math.floor(pmi.PathWidth/2));
+		}
+		//drunkenmeows
 		return new Location(world, x, 255, z);
 	}
 	
@@ -620,11 +751,16 @@ public class PlotManager
 	
 	public static void clear(World w, Plot plot)
 	{
-		clear(getBottom(w, plot), getTop(w, plot));
+    //drunkenmeows
+    PlotMapInfo pmi = getMap(w);
+		if(pmi.Terrain)
+			regen(w, plot);
+		else
+			clear(getBottom(w, plot), getTop(w, plot));
 		
-		RemoveLWC(w, plot);
-		
-		//regen(w, plot);
+		refreshPlotChunks(w, plot);
+		//drunkenmeows
+    RemoveLWC(w, plot);
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -1495,7 +1631,7 @@ public class PlotManager
 	}
 	
 	@SuppressWarnings("deprecation")
-    public static void regen(World w, Plot plot, CommandSender sender)
+    public static void regen(World w, Plot plot)//, CommandSender sender)
 	{
 		int bottomX = PlotManager.bottomX(plot.id, w);
 		int topX = PlotManager.topX(plot.id, w);
@@ -1616,8 +1752,8 @@ public class PlotManager
 		
 		if(pmi != null)
 		{
-			return new Location(w, bottomX(plot.id, w) + (topX(plot.id, w) - 
-					PlotManager.bottomX(plot.id, w))/2, pmi.RoadHeight + 2, bottomZ(plot.id, w) - 2);
+return w.getHighestBlockAt(new Location(w, bottomX(plot.id, w) + (topX(plot.id, w) - 
+					PlotManager.bottomX(plot.id, w))/2, pmi.RoadHeight + 2, bottomZ(plot.id, w) - 2)).getLocation().add(0.5, 1, 0.5);
 		}
 		else
 		{

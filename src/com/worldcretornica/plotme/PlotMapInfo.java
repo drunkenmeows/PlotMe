@@ -8,6 +8,11 @@ public class PlotMapInfo {
 	public int PlotSize;
 	public int PlotAutoLimit;
 	public int PathWidth;
+        //drunkenmeows
+        public boolean UsePath;
+	public boolean Terrain;
+        public int Height;
+        //drunkenmeows
 	
 	public short BottomBlockId;
 	public byte BottomBlockValue;

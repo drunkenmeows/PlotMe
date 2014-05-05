@@ -26,12 +26,12 @@ public class PMCommand implements CommandExecutor
 {
 	private PlotMe plugin;
 	private final ChatColor BLUE = ChatColor.BLUE;
-	private final ChatColor RED = ChatColor.RED;
+	private final static ChatColor RED = ChatColor.RED; //drunkenmeows
 	private final ChatColor RESET = ChatColor.RESET;
-	private final ChatColor AQUA = ChatColor.AQUA;
-	private final ChatColor GREEN = ChatColor.GREEN;
+	private final static ChatColor AQUA = ChatColor.AQUA; //drunkenmeows
+	private final static ChatColor GREEN = ChatColor.GREEN; //drunkenmeows
 	private final ChatColor ITALIC = ChatColor.ITALIC;
-	private final String PREFIX = PlotMe.PREFIX;
+	private final static String PREFIX = PlotMe.PREFIX; //drunkenmeows
 	private final String LOG = "[" + PlotMe.NAME + " Event] ";
 	private final boolean isAdv = PlotMe.advancedlogging;
 	
@@ -40,14 +40,16 @@ public class PMCommand implements CommandExecutor
 		plugin = instance;
 	}
 	
-	private String C(String caption)
+	private static String C(String caption) //drunkenmeows
 	{
 		return PlotMe.caption(caption);
 	}
 	
+  //Drunkenmeows
+	//added aliases p, pm, pme.
 	public boolean onCommand(CommandSender s, Command c, String l, String[] args)
 	{
-		if(l.equalsIgnoreCase("plotme") || l.equalsIgnoreCase("plot") || l.equalsIgnoreCase("p"))
+		if(l.equalsIgnoreCase("plotme") || l.equalsIgnoreCase("plot") || l.equalsIgnoreCase("p") || l.equalsIgnoreCase("pm") || l.equalsIgnoreCase("pme")) //drunkenmeows
 		{
 			if(!(s instanceof Player))
 			{
@@ -140,6 +142,7 @@ public class PMCommand implements CommandExecutor
 						if (a0.equalsIgnoreCase(C("CommandMove")) || a0.equalsIgnoreCase("m")) { return move(p, args);}
 						if (a0.equalsIgnoreCase("reload")) { return reload(s, args);}
 						if (a0.equalsIgnoreCase(C("CommandWEAnywhere"))) { return weanywhere(p, args);}
+            if (a0.equalsIgnoreCase(C("CommandShowInfo"))) { return showinfo(p, args);} //drunkenmeows
 						if (a0.equalsIgnoreCase(C("CommandList"))) { return plotlist(p, args);}
 						if (a0.equalsIgnoreCase(C("CommandExpired"))) { return expired(p, args);}
 						if (a0.equalsIgnoreCase(C("CommandAddtime"))) { return addtime(p, args);}
@@ -149,6 +152,7 @@ public class PMCommand implements CommandExecutor
 						
 						if (a0.equalsIgnoreCase(C("CommandSell"))) { return sell(p, args);}
 						if (a0.equalsIgnoreCase(C("CommandDispose"))) { return dispose(p, args);}
+            if (a0.equalsIgnoreCase(C("CommandRemoveBorder"))) { return removeborder(p, args);} //drunkenmeows
 						if (a0.equalsIgnoreCase(C("CommandAuction"))) { return auction(p, args);}
 						if (a0.equalsIgnoreCase(C("CommandBuy"))) { return buy(p, args);}
 						if (a0.equalsIgnoreCase(C("CommandBid"))) { return bid(p, args);}
@@ -607,7 +611,59 @@ public class PMCommand implements CommandExecutor
 		}
 		return true;
 	}
+  //drunkenmeows
+  private boolean removeborder(Player p, String[] args) 
+	{
+		if (PlotMe.cPerms(p, "PlotMe.admin.dispose") || PlotMe.cPerms(p, "PlotMe.use.removeborder"))
+		{
+			if(!PlotManager.isPlotWorld(p))
+			{
+				Send(p, RED + C("MsgNotPlotWorld"));
+			}
+			else
+			{
+				String id = PlotManager.getPlotId(p.getLocation());
+				if(id.equals(""))
+				{
+					Send(p, RED + C("MsgNoPlotFound"));
+				}
+				else
+				{
+					if(!PlotManager.isPlotAvailable(id, p))
+					{
+						Plot plot = PlotManager.getPlotById(p,id);
+						
+						String name = p.getName();
+						
+						if(plot.owner.equalsIgnoreCase(name) || PlotMe.cPerms(p, "PlotMe.admin.removeborder"))
+						{
+							PlotMapInfo pmi = PlotManager.getMap(p);
+							
+							World w = p.getWorld();
+							
+							if(pmi.Terrain)
+								PlotManager.removeborder(w, pmi.Height, id);
 
+						}
+						/*else
+						{
+							Send(p, RED + C("MsgThisPlot") + "(" + id + ") " + C("MsgNotYoursCannotDispose"));
+						}*/
+					}
+					else
+					{
+						Send(p, RED + C("MsgThisPlot") + "(" + id + ") " + C("MsgHasNoOwner"));
+					}
+				}
+			}
+		}
+		else
+		{
+			Send(p, RED + C("MsgPermissionDenied"));
+		}
+		return true;
+	}
+  //drunkenmeows
 	private boolean dispose(Player p, String[] args) 
 	{
 		if (PlotMe.cPerms(p, "PlotMe.admin.dispose") || PlotMe.cPerms(p, "PlotMe.use.dispose"))
@@ -1333,7 +1389,7 @@ public class PMCommand implements CommandExecutor
 					
 					if(plot.auctionned)
 					{
-						addition.append(" " + C("WordAuction") + ": " + GREEN + round(plot.currentbid) + RESET + ((plot.currentbidder != null && !plot.currentbidder.equals("")) ? " " + plot.currentbidder : "") );
+						addition.append(" " + C("WordAuction") + ": " + GREEN + round(plot.currentbid) + RESET + ((!plot.currentbidder.equals("")) ? " " + plot.currentbidder : "") );
 					}
 					
 					if(plot.forsale)
@@ -1434,6 +1490,29 @@ public class PMCommand implements CommandExecutor
 		}
 		return true;
 	}
+  //drunkenmeows
+  private boolean showinfo(Player p, String[] args)
+	{		
+		if(PlotMe.isShowPlotInfo(p))
+		{
+			PlotMe.removeShowPlotInfo(p);
+		}
+		else
+		{
+			PlotMe.addShowPlotInfo(p);					
+		}
+		
+		if(PlotMe.isShowPlotInfo(p))
+		{
+			Send(p,"PlotInfo Messages: ON");
+		}
+		else
+		{
+			Send(p, "PlotInfo Messages: OFF");
+		}
+		
+		return true;
+	}//drunkenmeows
 	
 	private boolean showhelp(Player p, int page)
 	{
@@ -2096,8 +2175,7 @@ public class PMCommand implements CommandExecutor
 				UUID uuid = p.getUniqueId();
 				int nb = 1;
 				World w = null;
-				String worldname = "";
-				
+        String worldname = "";
 				if(!PlotManager.isPlotWorld(p) && PlotMe.allowWorldTeleport)
 				{
 					w = PlotManager.getFirstWorld();
@@ -2107,10 +2185,9 @@ public class PMCommand implements CommandExecutor
 					w = p.getWorld();
 				}
 				
-				if(w != null) {
+        if(w != null) {
 				    worldname = w.getName();
 				}
-				
 				if(args[0].contains(":"))
 				{
 					try{
@@ -2145,7 +2222,7 @@ public class PMCommand implements CommandExecutor
 					else
 					{
 						w = Bukkit.getWorld(args[1]);
-						worldname = args[1];
+            worldname = args[1];
 					}
 				}
 				
@@ -2153,19 +2230,19 @@ public class PMCommand implements CommandExecutor
 				{
 					if(Bukkit.getWorld(args[2]) == null)
 					{
-						Send(p, RED + args[2] + " " + C("MsgWorldNotPlot"));
+						Send(p, RED + args[2] +" "+ C("MsgWorldNotPlot"));
 						return true;
 					}
 					else
 					{
 						w = Bukkit.getWorld(args[2]);
-						worldname = args[2];
+            worldname = args[2];
 					}
 				}
 				
 				if(!PlotManager.isPlotWorld(w))
 				{
-					Send(p, RED + worldname + " " + C("MsgWorldNotPlot"));
+					Send(p, RED + worldname +" "+ C("MsgWorldNotPlot"));
 				}
 				else
 				{
@@ -2244,6 +2321,78 @@ public class PMCommand implements CommandExecutor
 		}
 		return true;
 	}
+  
+  //drunkenmeows
+  public static boolean info(Player p, Location from, String[] args) 
+	{
+		if (PlotMe.cPerms(p, "PlotMe.use.info"))
+		{
+			if(!PlotManager.isPlotWorld(p))
+			{
+				Send(p, RED + C("MsgNotPlotWorld"));
+			}
+			else
+			{
+				String id = PlotManager.getPlotId(from);
+				
+				if(!id.equals(""))
+				//{
+				//	Send(p, RED + C("MsgNoPlotFound"));
+				//}
+				//else
+				{
+					if(!PlotManager.isPlotAvailable(id, p))
+					{
+						Plot plot = PlotManager.getPlotById(p,id);
+						
+						p.sendMessage(GREEN + C("InfoId") + ": " + AQUA + id + 
+								GREEN + " " + C("InfoOwner") + ": " + AQUA + plot.owner + 
+								GREEN + " " + C("InfoBiome") + ": " + AQUA + FormatBiome(plot.biome.name()));
+						
+						p.sendMessage(GREEN + C("InfoExpire") + ": " + AQUA + ((plot.expireddate == null) ? C("WordNever") : plot.expireddate.toString()) +
+								GREEN + " " + C("InfoFinished") + ": " + AQUA + ((plot.finished) ? C("WordYes") : C("WordNo")) +
+								GREEN + " " + C("InfoProtected") + ": " + AQUA + ((plot.protect) ? C("WordYes") : C("WordNo")));
+						
+						if(plot.allowedcount() > 0)
+						{
+							p.sendMessage(GREEN + C("InfoHelpers") + ": " + AQUA + plot.getAllowed());
+						}
+						
+						if(PlotMe.allowToDeny && plot.deniedcount() > 0)
+						{
+							p.sendMessage(GREEN + C("InfoDenied") + ": " + AQUA + plot.getDenied());
+						}
+						
+						if(PlotManager.isEconomyEnabled(p))
+						{
+							if(plot.currentbidder.equalsIgnoreCase(""))
+							{
+								p.sendMessage(GREEN + "Auctionned: " + AQUA + ((plot.auctionned) ? C("WordYes") + 
+										GREEN + " Minimum bid: " + AQUA + round(plot.currentbid) : C("WordNo")) +
+										GREEN + " For sale: " + AQUA + ((plot.forsale) ? AQUA + round(plot.customprice) : C("WordNo")));
+							}
+							else
+							{
+								p.sendMessage(GREEN + C("InfoAuctionned") + ": " + AQUA + ((plot.auctionned) ? C("WordYes") + 
+										GREEN + " " + C("InfoBidder") + ": " + AQUA + plot.currentbidder + 
+										GREEN + " " + C("InfoBid") + ": " + AQUA + round(plot.currentbid) : C("WordNo")) +
+										GREEN + " " + C("InfoForSale") + ": " + AQUA + ((plot.forsale) ? AQUA + round(plot.customprice) : C("WordNo")));
+							}
+						}
+					}
+					else
+					{
+						Send(p, RED + C("MsgThisPlot") + "(" + id + ") " + C("MsgHasNoOwner"));
+					}
+				}
+			}
+		}
+		else
+		{
+			Send(p, RED + C("MsgPermissionDenied"));
+		}
+		return true;
+	}//drunkenmeows
 	
 	private boolean info(Player p, String[] args)
 	{
@@ -2287,7 +2436,7 @@ public class PMCommand implements CommandExecutor
 						
 						if(PlotManager.isEconomyEnabled(p))
 						{
-							if(plot.currentbidder != null || plot.currentbidder.equalsIgnoreCase(""))
+							if(plot.currentbidder.equalsIgnoreCase(""))
 							{
 								p.sendMessage(GREEN + C("InfoAuctionned") + ": " + AQUA + ((plot.auctionned) ? C("WordYes") + 
 										GREEN + " " + C("InfoMinimumBid") + ": " + AQUA + round(plot.currentbid) : C("WordNo")) +
@@ -3339,7 +3488,7 @@ public class PMCommand implements CommandExecutor
 									}
 								}
 								
-								if(plot.currentbidder != null && !plot.currentbidder.equals(""))
+								if(!plot.currentbidder.equals(""))
 								{
 									EconomyResponse er = PlotMe.economy.depositPlayer(plot.currentbidder, plot.currentbid);
 									
@@ -3514,7 +3663,7 @@ public class PMCommand implements CommandExecutor
 		return ret;
 	}
 	
-	private String round(double money)
+	private static String round(double money) //drunkenmeows
 	{
 		return (money % 1 == 0) ? "" + Math.round(money) : "" + money;
 	}
@@ -3546,12 +3695,12 @@ public class PMCommand implements CommandExecutor
 			return GREEN + format;
 	}
 	
-	private void Send(CommandSender cs, String text)
+	private static void Send(CommandSender cs, String text) //drunkenmeows
 	{
 		cs.sendMessage(PREFIX + text);
 	}
 	
-	private String FormatBiome(String biome)
+	private static String FormatBiome(String biome) //drunkenmeows
 	{
 		biome = biome.toLowerCase();
 		

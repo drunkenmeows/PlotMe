@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 
 import com.worldcretornica.plotme.Plot;
 import com.worldcretornica.plotme.PlotManager;
+import com.worldcretornica.plotme.PMCommand;
 import com.worldcretornica.plotme.PlotMe;
 import com.worldcretornica.plotme.PlotWorldEdit;
 
@@ -51,6 +52,12 @@ public class PlotWorldEditListener implements Listener
 					if(!idFrom.equalsIgnoreCase(idTo))
 					{
 						changemask = true;
+            	//Drunkenmeows
+              //if player want plot info
+              if(PlotMe.isShowPlotInfo(event.getPlayer())) {
+                //show plot info
+                PMCommand.info(event.getPlayer(), to, null);
+              }
 					}
 				}
 			}
@@ -60,7 +67,7 @@ public class PlotWorldEditListener implements Listener
 				if(PlotManager.isPlotWorld(to.getWorld()))
 				{
 					if(!PlotMe.isIgnoringWELimit(p))
-						PlotWorldEdit.setMask(p);
+						PlotWorldEdit.setMask(p,to); //drunkenmeows
 					else
 						PlotWorldEdit.removeMask(p);
 				}

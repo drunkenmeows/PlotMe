@@ -18,7 +18,6 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.Bukkit;
@@ -77,6 +76,7 @@ public class PlotMe extends JavaPlugin
     
     private static HashSet<String> playersignoringwelimit = null;
     private static HashMap<String, String> captions;
+    public static HashSet<String> playersshowplotinfo = null;
     
     public static World worldcurrentlyprocessingexpired;
     public static CommandSender cscurrentlyprocessingexpired;
@@ -113,6 +113,7 @@ public class PlotMe extends JavaPlugin
 		economy = null;
 		usinglwc = null;
 		playersignoringwelimit = null;
+    playersshowplotinfo = null; //drunkenmeows
 		captions = null;
 		worldcurrentlyprocessingexpired = null;
 		cscurrentlyprocessingexpired = null;
@@ -258,7 +259,8 @@ public class PlotMe extends JavaPlugin
 		WEBSITE = pdfFile.getWebsite();
 		configpath = getDataFolder().getAbsolutePath();
 		playersignoringwelimit = new HashSet<String>();
-
+    playersshowplotinfo = new HashSet<String>(); //drunkenmeows
+    
 		if(!this.getDataFolder().exists()) 
 		{
         	this.getDataFolder().mkdirs();
@@ -368,7 +370,14 @@ public class PlotMe extends JavaPlugin
 			tempPlotInfo.PlotAutoLimit = currworld.getInt("PlotAutoLimit", 100);
 			tempPlotInfo.PathWidth = currworld.getInt("PathWidth", 7);
 			tempPlotInfo.PlotSize = currworld.getInt("PlotSize", 32);
-			
+			//drunkenmeows
+      if(tempPlotInfo.PathWidth > 0)
+				tempPlotInfo.UsePath = true;
+			else
+				tempPlotInfo.UsePath = false;
+			tempPlotInfo.Terrain = currworld.getBoolean("Terrain", true);
+			tempPlotInfo.Height = currworld.getInt("BorderHeight");
+      //drunkenmeows
 			tempPlotInfo.BottomBlockId = getBlockId(currworld, "BottomBlockId", "7:0");
 			tempPlotInfo.BottomBlockValue = getBlockValue(currworld, "BottomBlockId", "7:0");
 			tempPlotInfo.WallBlockId = getBlockId(currworld, "WallBlockId", "44:0");
@@ -561,7 +570,28 @@ public class PlotMe extends JavaPlugin
 		else
 			return playersignoringwelimit.contains(p.getName());
 	}
-		
+  //drunkenmeows
+  public static void addShowPlotInfo(Player p)
+	{
+		if(!playersshowplotinfo.contains(p.getName()))
+		{
+			playersshowplotinfo.add(p.getName());
+		}
+	}
+  
+  public static void removeShowPlotInfo(Player p)
+	{
+		if(playersshowplotinfo.contains(p.getName()))
+		{
+			playersshowplotinfo.remove(p.getName());
+		}
+	}
+  
+  public static boolean isShowPlotInfo(Player p)
+	{
+			return playersshowplotinfo.contains(p.getName());
+	}
+  //drunkenmeows
 	public static int getPlotLimit(Player p)
 	{
 		int max = -2;
@@ -960,7 +990,8 @@ public class PlotMe extends JavaPlugin
 		properties.put("CommandDispose", "dispose");
 		properties.put("CommandAuction", "auction");
 		properties.put("CommandHome", "home");
-		
+		properties.put("CommandShowInfo", "showinfo");//drunkenmeows
+    
 		properties.put("ErrCannotBuild","You cannot build here.");
 		properties.put("ErrCannotUseEggs", "You cannot use eggs here.");
 		properties.put("ErrCannotUse", "You cannot use that.");

@@ -2175,7 +2175,7 @@ public class PMCommand implements CommandExecutor
 				UUID uuid = p.getUniqueId();
 				int nb = 1;
 				World w = null;
-        String worldname = "";
+                                String worldname = "";
 				if(!PlotManager.isPlotWorld(p) && PlotMe.allowWorldTeleport)
 				{
 					w = PlotManager.getFirstWorld();
@@ -2185,7 +2185,7 @@ public class PMCommand implements CommandExecutor
 					w = p.getWorld();
 				}
 				
-        if(w != null) {
+                                if(w != null) {
 				    worldname = w.getName();
 				}
 				if(args[0].contains(":"))
@@ -2222,7 +2222,7 @@ public class PMCommand implements CommandExecutor
 					else
 					{
 						w = Bukkit.getWorld(args[1]);
-            worldname = args[1];
+                                                worldname = args[1];
 					}
 				}
 				
@@ -2236,7 +2236,7 @@ public class PMCommand implements CommandExecutor
 					else
 					{
 						w = Bukkit.getWorld(args[2]);
-            worldname = args[2];
+                                                worldname = args[2];
 					}
 				}
 				
@@ -3173,7 +3173,7 @@ public class PMCommand implements CommandExecutor
 										}
 									}
 									
-                                    plot.addDenied(denied);
+                                                                        plot.addDenied(denied);
 									
 									if(denied.equals("*"))
 									{
@@ -3188,7 +3188,7 @@ public class PMCommand implements CommandExecutor
 									else
 									{
 										@SuppressWarnings("deprecation")
-                                        Player deniedplayer = Bukkit.getPlayerExact(denied);
+                                                                                Player deniedplayer = Bukkit.getPlayerExact(denied);
 										
 										if(deniedplayer != null)
 										{

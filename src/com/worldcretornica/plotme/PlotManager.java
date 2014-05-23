@@ -400,7 +400,7 @@ public class PlotManager
 		}
 	}
 	
-	//create outline in the sky
+	//create outline in the sky or as a terrain contour
 	public static void addborder(World w, int height, int blockid, String id)
 	{
 		int bx = bottomX(id, w);

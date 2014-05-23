@@ -496,9 +496,9 @@ public class PlotManager
 	} 
   //drunkenmeows
 	
-	public static Plot createPlot(World world, String id, String owner, UUID uuid)
+    public static Plot createPlot(World world, String id, String owner, UUID uuid)
     {
-        if(isPlotAvailable(id, world) && id != "")
+        if(!id.isEmpty() && isPlotAvailable(id, world))
         {
             Plot plot = new Plot(owner, uuid, getPlotTopLoc(world, id), getPlotBottomLoc(world, id), id, getMap(world).DaysToExpiration);
             PlotMapInfo pmi = getMap(world); //drunkenmeows

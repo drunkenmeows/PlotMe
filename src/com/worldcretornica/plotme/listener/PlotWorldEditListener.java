@@ -67,6 +67,7 @@ public class PlotWorldEditListener implements Listener
 				if(PlotManager.isPlotWorld(to.getWorld()))
 				{
 					if(!PlotMe.isIgnoringWELimit(p))
+                                                //fixed mask plot switching!!
 						PlotWorldEdit.setMask(p,to); //drunkenmeows
 					else
 						PlotWorldEdit.removeMask(p);
